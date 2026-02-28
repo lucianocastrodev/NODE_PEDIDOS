@@ -24,7 +24,7 @@ app.use(cors({
 // 📁 Arquivos estáticos
 // ===============================
 
-// Sobe um nível para acessar a pasta public na raiz
+// Servir arquivos estáticos da pasta public (na raiz)
 app.use(express.static(path.join(__dirname, "..", "public")));
 app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "..", "public", "index.html")); });
 
