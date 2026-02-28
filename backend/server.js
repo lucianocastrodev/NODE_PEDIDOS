@@ -25,8 +25,8 @@ app.use(cors({
 // ===============================
 
 // Servir arquivos estáticos da pasta public (na raiz)
+// Arquivos estáticos
 app.use(express.static(path.join(__dirname, "..", "public")));
-app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "..", "public", "index.html")); });
 
 // ===============================
 // JSON + Rotas
