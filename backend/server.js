@@ -1,8 +1,9 @@
-// server.js
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
 const cors = require("cors");
+const path = require("path");
+
 const pedidosRoutes = require("./routes/pedidos");
 const controller = require("./controllers/pedidosController");
 
@@ -14,10 +15,18 @@ const wss = new WebSocket.Server({ server });
 // 🔧 CORS
 // ===============================
 app.use(cors({
-    origin: "*", // Para testes, permite qualquer origem
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"]
 }));
+
+// ===============================
+// 📁 Arquivos estáticos
+// ===============================
+
+// Sobe um nível para acessar a pasta public na raiz
+app.use(express.static(path.join(__dirname, "..", "public")));
+app.get("/", (req, res) => { res.sendFile(path.join(__dirname, "..", "public", "index.html")); });
 
 // ===============================
 // JSON + Rotas
@@ -35,11 +44,8 @@ controller.setWebSocketServer(wss);
 // ===============================
 wss.on("connection", (ws) => {
     console.log("Cliente WebSocket conectado");
-
-    // Apenas confirma que o cliente está conectado
     ws.send(JSON.stringify({ tipo: "conectado" }));
 
-    // Quando o cliente fechar
     ws.on("close", () => {
         console.log("Cliente WebSocket desconectado");
     });
