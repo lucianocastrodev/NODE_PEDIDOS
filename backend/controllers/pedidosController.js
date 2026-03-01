@@ -20,84 +20,104 @@ function broadcast(data) {
 }
 
 // GET /pedidos
-function listar(req, res) {
-    db.query("SELECT * FROM pedidos ORDER BY id DESC", (err, results) => {
-        if (err) return res.status(500).json({ erro: err.message });
+async function listar(req, res) {
+    try {
+        const [results] = await db.query(
+            "SELECT * FROM pedidos ORDER BY id DESC"
+        );
 
-        // força quantidade como number
         const pedidos = results.map(p => ({
             ...p,
             quantidade: Number(p.quantidade)
         }));
 
         res.json(pedidos);
-    });
+    } catch (err) {
+        console.error("Erro ao listar:", err);
+        res.status(500).json({ erro: err.message });
+    }
 }
 
 // POST /pedidos
-function criar(req, res) {
-    const { cliente, produto } = req.body;
-    const quantidade = Number(req.body.quantidade);
+async function criar(req, res) {
+    try {
+        const { cliente, produto } = req.body;
+        const quantidade = Number(req.body.quantidade);
 
-    db.query(
-        "INSERT INTO pedidos (cliente, produto, quantidade) VALUES (?, ?, ?)",
-        [cliente, produto, quantidade],
-        (err, result) => {
-            if (err) return res.status(500).json({ erro: err.message });
+        const [result] = await db.query(
+            "INSERT INTO pedidos (cliente, produto, quantidade) VALUES (?, ?, ?)",
+            [cliente, produto, quantidade]
+        );
 
-            const novoPedido = {
-                id: result.insertId,
-                cliente,
-                produto,
-                quantidade: Number(quantidade),
-                status: "novo"
-            };
+        const novoPedido = {
+            id: result.insertId,
+            cliente,
+            produto,
+            quantidade,
+            status: "novo"
+        };
 
-            broadcast({ tipo: "novo_pedido", pedido: novoPedido });
+        broadcast({ tipo: "novo_pedido", pedido: novoPedido });
 
-            res.json(novoPedido);
-        }
-    );
+        res.json(novoPedido);
+
+    } catch (err) {
+        console.error("Erro ao criar:", err);
+        res.status(500).json({ erro: err.message });
+    }
 }
 
 // PUT /pedidos/:id
-function atualizar(req, res) {
-    const { id } = req.params;
-    const { cliente, produto, status } = req.body;
-    const quantidade = Number(req.body.quantidade);
+async function atualizar(req, res) {
+    try {
+        const { id } = req.params;
+        const { cliente, produto, status } = req.body;
+        const quantidade = Number(req.body.quantidade);
 
-    db.query(
-        "UPDATE pedidos SET cliente=?, produto=?, quantidade=?, status=? WHERE id=?",
-        [cliente, produto, quantidade, status, id],
-        (err) => {
-            if (err) return res.status(500).json({ erro: err.message });
+        await db.query(
+            "UPDATE pedidos SET cliente=?, produto=?, quantidade=?, status=? WHERE id=?",
+            [cliente, produto, quantidade, status, id]
+        );
 
-            const pedidoAtualizado = {
-                id: Number(id),
-                cliente,
-                produto,
-                quantidade: Number(quantidade),
-                status
-            };
+        const pedidoAtualizado = {
+            id: Number(id),
+            cliente,
+            produto,
+            quantidade,
+            status
+        };
 
-            broadcast({ tipo: "pedido_atualizado", pedido: pedidoAtualizado });
+        broadcast({ tipo: "pedido_atualizado", pedido: pedidoAtualizado });
 
-            res.json(pedidoAtualizado);
-        }
-    );
+        res.json(pedidoAtualizado);
+
+    } catch (err) {
+        console.error("Erro ao atualizar:", err);
+        res.status(500).json({ erro: err.message });
+    }
 }
 
 // DELETE /pedidos/:id
-function deletar(req, res) {
-    const { id } = req.params;
+async function deletar(req, res) {
+    try {
+        const { id } = req.params;
 
-    db.query("DELETE FROM pedidos WHERE id=?", [id], (err) => {
-        if (err) return res.status(500).json({ erro: err.message });
+        await db.query("DELETE FROM pedidos WHERE id=?", [id]);
 
         broadcast({ tipo: "pedido_deletado", id: Number(id) });
 
         res.json({ sucesso: true });
-    });
+
+    } catch (err) {
+        console.error("Erro ao deletar:", err);
+        res.status(500).json({ erro: err.message });
+    }
 }
 
-module.exports = { listar, criar, atualizar, deletar, setWebSocketServer };
+module.exports = {
+    listar,
+    criar,
+    atualizar,
+    deletar,
+    setWebSocketServer
+};
