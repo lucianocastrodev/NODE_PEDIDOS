@@ -24,6 +24,18 @@
      width: 100%;
  }
 
+ @media(max-width: 720px) {
+    body {
+            padding: 0;
+        }
+    
+        /* Glassmorphism container */
+        .glass-container {
+            border-radius: 0;
+            padding: 20px;
+        }
+ }
+
  /* Header com gradiente */
  .dashboard-header {
      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
