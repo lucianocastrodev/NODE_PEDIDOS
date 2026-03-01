@@ -124,7 +124,6 @@
             </div>
 
             <span class="badge-status bg-${p.status}">
-                <i class="bi ${p.status === 'novo' ? 'bi-star' : p.status === 'preparando' ? 'bi-fire' : 'bi-check-circle'}"></i>
                 ${p.status === 'novo' ? 'Novo' : p.status === 'preparando' ? 'Preparando' : 'Entregue'}
             </span>
         </div>
@@ -171,15 +170,12 @@
 
     let icone, texto;
     if (p.status === 'novo') {
-        icone = 'bi-star';
-    texto = '🆕 Novo';
-            } else if (p.status === 'preparando') {
-        icone = 'bi-fire';
-    texto = '👨‍🍳 Preparando';
-            } else {
-        icone = 'bi-check-circle';
-    texto = '✅ Entregue';
-            }
+        texto = 'Novo';
+    } else if (p.status === 'preparando') {
+        texto = 'Preparando';
+    } else {
+        texto = 'Entregue';
+    }
 
     badge.innerHTML = `<i class="bi ${icone}"></i> ${texto}`;
 
